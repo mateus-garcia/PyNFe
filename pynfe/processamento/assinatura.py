@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from pynfe.utils import etree, remover_acentos
-from pynfe.utils.flags import NAMESPACE_SIG
-import subprocess
 import signxml
 from signxml import XMLSigner
+
 from pynfe.entidades import CertificadoA1
+from pynfe.utils import etree, remover_acentos
+from pynfe.utils.flags import NAMESPACE_SIG
 
 
 class Assinatura(object):
@@ -31,7 +31,10 @@ class AssinaturaA1(Assinatura):
 
     def assinar(self, xml, retorna_string=False):
         # busca tag que tem id(reference_uri), logo nao importa se tem namespace
-        reference = xml.find(".//*[@Id]").attrib['Id']
+        try:
+            reference = xml.find(".//*[@Id]").attrib['Id']
+        except AttributeError:
+            reference = ''
 
         # retira acentos
         xml_str = remover_acentos(etree.tostring(xml, encoding="unicode", pretty_print=False))

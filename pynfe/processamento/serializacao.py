@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from pynfe.entidades import NotaFiscal
-from pynfe.utils import etree, so_numeros, obter_municipio_por_codigo, \
-    obter_pais_por_codigo, obter_municipio_e_codigo, formatar_decimal, \
-    remover_acentos, obter_uf_por_codigo, obter_codigo_por_municipio
-from pynfe.utils.flags import CODIGOS_ESTADOS, VERSAO_PADRAO, NAMESPACE_NFE, NAMESPACE_SIG, VERSAO_QRCODE
-from pynfe.utils.webservices import NFCE
 import base64
 import hashlib
-from datetime import datetime
 import re
+from datetime import datetime
+
+from pynfe.entidades import NotaFiscal
+from pynfe.utils import etree, so_numeros, obter_municipio_por_codigo, \
+    obter_pais_por_codigo, obter_codigo_por_municipio
+from pynfe.utils.flags import CODIGOS_ESTADOS, VERSAO_PADRAO, NAMESPACE_NFE, NAMESPACE_SIG, VERSAO_QRCODE
+from pynfe.utils.webservices import NFCE
 
 
 class Serializacao(object):
@@ -846,8 +846,18 @@ class SerializacaoNfse(object):
         if self.autorizador.lower() == 'ginfes':
             from pynfe.processamento.autorizador_nfse import SerializacaoGinfes
             return SerializacaoGinfes().consultar_nfse(emitente, numero, inicio, fim)
+        elif self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().consultar_nfse(emitente, numero, inicio, fim)
         else:
-            raise Exception('Este método só esta implementado no autorizador ginfes.')
+            raise Exception('Este método só esta implementado no autorizador ginfes e saopaulo')
+
+    def consultar_nfse_emit_recb(self, cnpj, emitente=None, cliente=None, inicio=None, fim=None):
+        if self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().consultar_nfse_periodo(cnpj, emitente, cliente, inicio, fim)
+        else:
+            raise Exception('Este método só esta implementado no autorizador saopaulo')
 
     def consultar_lote(self, emitente, numero):
         if self.autorizador.lower() == 'ginfes':

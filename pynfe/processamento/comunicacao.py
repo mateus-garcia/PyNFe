@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-import re
-import ssl
 import datetime
+import re
+
 import requests
+
+from pynfe.entidades.certificado import CertificadoA1
 from pynfe.utils import etree, so_numeros
 from pynfe.utils.flags import (
     NAMESPACE_NFE,
@@ -15,7 +17,6 @@ from pynfe.utils.flags import (
     NAMESPACE_METODO
 )
 from pynfe.utils.webservices import NFE, NFCE, NFSE
-from pynfe.entidades.certificado import CertificadoA1
 from .assinatura import AssinaturaA1
 
 
@@ -460,6 +461,9 @@ class ComunicacaoNfse(Comunicacao):
         elif self.autorizador == 'BETHA':
             self._namespace = NAMESPACE_BETHA
             self._versao = '2.02'
+        elif self.autorizador == 'SAOPAULO':
+            self._namespace = "http://www.prefeitura.sp.gov.br/nfe"
+            self._versao = '2.7.3'
         else:
             raise Exception('Autorizador não encontrado!')
 
@@ -493,8 +497,35 @@ class ComunicacaoNfse(Comunicacao):
             xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
             # comunica via wsdl
             return self._post_https(url, xml, 'consulta')
+        elif self.autorizador == 'SAOPAULO':
+            # xml
+            xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'consulta')
         else:
-            raise Exception('Este método só esta implementado no autorizador ginfes.')
+            raise Exception('Este método só esta implementado no autorizador ginfes e são paulo')
+
+    def consultar_emitidas(self, xml):
+        # url do serviço
+        url = self._get_url()
+        if self.autorizador == 'SAOPAULO':
+            # xml
+            xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'consulta_emitidas')
+        else:
+            raise Exception('Este método só esta implementado no autorizador ginfes e são paulo')
+
+    def consultar_recebidas(self, xml):
+        # url do serviço
+        url = self._get_url()
+        if self.autorizador == 'SAOPAULO':
+            # xml
+            xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'consulta_recebidas')
+        else:
+            raise Exception('Este método só esta implementado no autorizador ginfes e são paulo')
 
     def consultar_rps(self, xml):
         # url do serviço
@@ -639,7 +670,7 @@ class ComunicacaoNfse(Comunicacao):
             certificadoA1 = CertificadoA1(self.certificado)
             chave, cert = certificadoA1.separar_arquivo(self.certificado_senha, caminho=True)
 
-            cliente = Client(url, transport = HttpAuthenticated(key=chave, cert=cert, endereco=url))
+            cliente = Client(url, transport=HttpAuthenticated(key=chave, cert=cert, endereco=url))
 
             # gerar nfse
             if metodo == 'gerar':
@@ -664,5 +695,26 @@ class ComunicacaoNfse(Comunicacao):
             # TODO outros metodos
             else:
                 raise Exception('Método não implementado no autorizador.')
+        except Exception as e:
+            raise e
+
+    def _post_sp(self, url, xml, metodo):
+        """ Comunicação wsdl (https) utilizando certificado do usuário. Para o webbsercice de São Paulo """
+        # comunicacao wsdl
+        try:
+            from suds.client import Client
+            from pynfe.utils.https_nfse import HttpAuthenticated
+
+            certificadoA1 = CertificadoA1(self.certificado)
+            chave, cert = certificadoA1.separar_arquivo(self.certificado_senha, caminho=True)
+
+            cliente = Client(url, transport=HttpAuthenticated(key=chave, cert=cert, endereco=url))
+            if metodo == 'consulta':
+                return cliente.service.ConsultaNFe(1, xml)
+            elif metodo == 'consulta_recebidas':
+                return cliente.service.ConsultaNFeRecebidas(1, xml)
+            elif metodo == 'consulta_emitidas':
+                return cliente.service.ConsultaNFeEmitidas(1, xml)
+
         except Exception as e:
             raise e

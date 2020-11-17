@@ -1,10 +1,12 @@
-from pyxb import BIND
+import io
 from importlib import import_module
-from decimal import Decimal, ROUND_HALF_UP
+
+from lxml import etree
+from pyxb import BIND
 
 
 class InterfaceAutorizador():
-    #TODO Colocar raise Exception Not Implemented nos metodos
+    # TODO Colocar raise Exception Not Implemented nos metodos
     def consultar_rps(self):
         pass
 
@@ -493,8 +495,8 @@ class SerializacaoGinfes(InterfaceAutorizador):
         raiz = etree.Element('{%s}CancelarNfseEnvio'%ns1, nsmap={'ns1': ns1, 'ns2':ns2})
         prestador = etree.SubElement(raiz, '{%s}Prestador'%ns1)
         etree.SubElement(prestador, '{%s}Cnpj'%ns2).text = nfse.emitente.cnpj
-        etree.SubElement(prestador, '{%s}InscricaoMunicipal'%ns2).text = nfse.emitente.inscricao_municipal
-        etree.SubElement(raiz, '{%s}NumeroNfse'%ns1).text = nfse.identificador
+        etree.SubElement(prestador, '{%s}InscricaoMunicipal' % ns2).text = nfse.emitente.inscricao_municipal
+        etree.SubElement(raiz, '{%s}NumeroNfse' % ns1).text = nfse.identificador
         return etree.tostring(raiz, encoding='unicode')
 
     def cabecalho(self):
@@ -503,3 +505,105 @@ class SerializacaoGinfes(InterfaceAutorizador):
         cabecalho.versao = '3'
         cabecalho.versaoDados = '3'
         return cabecalho.toxml(element_name='ns2:cabecalho')
+
+
+class SerializacaoSP(InterfaceAutorizador):
+    def __init__(self):
+        # importa
+        global _tipos, servico_cancela_lote_v01
+        global servico_cancela_NFe_v01, servico_consulta_CNPJ_v01
+        global servico_consulta_lote_v01
+        global servico_consulta_NFe_periodo_v01
+        global servico_consulta_NFe_v01
+        global servico_envio_lote_RPS_v01
+        global servico_envio_RPS_v01
+        global servico_informacoes_lote_v01
+        _tipos = import_module('pynfe.utils.nfse.sp._tipos')
+        servico_cancela_lote_v01 = import_module('pynfe.utils.nfse.sp.servico_cancela_lote_v01')
+        servico_cancela_NFe_v01 = import_module('pynfe.utils.nfse.sp.servico_cancela_NFe_v01')
+        servico_consulta_CNPJ_v01 = import_module('pynfe.utils.nfse.sp.servico_consulta_CNPJ_v01')
+        servico_consulta_lote_v01 = import_module('pynfe.utils.nfse.sp.servico_consulta_lote_v01')
+        servico_consulta_NFe_periodo_v01 = import_module('pynfe.utils.nfse.sp.servico_consulta_NFe_periodo_v01')
+        servico_consulta_NFe_v01 = import_module('pynfe.utils.nfse.sp.servico_consulta_NFe_v01')
+        servico_envio_lote_RPS_v01 = import_module('pynfe.utils.nfse.sp.servico_envio_lote_RPS_v01')
+        servico_envio_RPS_v01 = import_module('pynfe.utils.nfse.sp.servico_envio_RPS_v01')
+        servico_informacoes_lote_v01 = import_module('pynfe.utils.nfse.sp.servico_informacoes_lote_v01')
+
+    def consultar_nfse(self, emitente, numero=None, inicio=None, fim=None):
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = emitente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_informacoes_lote_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+
+        # Chave
+        chave = _tipos.tpChaveNFeRPS()
+        chaveNfe = _tipos.tpChaveNFe()
+        chaveNfe.InscricaoPrestador = int(emitente.inscricao_municipal)
+        chaveNfe.NumeroNFe = numero
+        chave.ChaveNFe = chaveNfe
+
+        # Consulta
+        consulta = servico_consulta_NFe_v01.PedidoConsultaNFe()
+        consulta.Cabecalho = cabecalho
+
+        consulta.Detalhe.append(chave)
+        f_str = io.StringIO()
+        consulta.export(f_str, 0,
+                        name_='p1:PedidoConsultaNFe',
+                        namespacedef_='xmlns:p1="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+                        pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def consultar_nfse_periodo(self, cnpj, emitente, cliente, inicio=None, fim=None):
+        # parece ok por enquanto
+
+        # CPFCNPJRementente
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = cnpj
+        # Cabecalho
+        cabecalho = servico_consulta_NFe_periodo_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+
+        CPF_pedido = _tipos.tpCPFCNPJ()
+
+        if emitente is not None and cliente is None:
+            # Pedido de Consulta de NF-e Emitidas (ConsultaNFeEmitidas)
+            CPF_pedido.CNPJ = emitente.cnpj
+            cabecalho.Inscricao = emitente.inscricao_municipal
+
+        if emitente is None and cliente is not None:
+            # Pedido de Consulta de NF-e Recebidas (ConsultaNFeRecebidas)
+
+            if cliente.tipo_documento != 'CNPJ':
+                raise ValueError('cliente.tipo_documento != "CNPJ"')
+            CPF_pedido.CNPJ = cliente.numero_documento
+            cabecalho.Inscricao = int(cliente.inscricao_municipal)
+        else:
+            raise ValueError('emitente e cliente são None')
+
+        cabecalho.CPFCNPJ = CPF_pedido
+
+        cabecalho.dtInicio = inicio
+        cabecalho.dtFim = fim
+
+        # Consulta
+        consulta = servico_consulta_NFe_periodo_v01.PedidoConsultaNFePeriodo()
+        consulta.Cabecalho = cabecalho
+
+        f_str = io.StringIO()
+        consulta.export(f_str, 0,
+                        name_='p1:PedidoConsultaNFePeriodo',
+                        namespacedef_='xmlns:p1="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+                        pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def cabecalho(self):
+        # info
+        cabecalho = servico_informacoes_lote_v01.CabecalhoType()
+        cabecalho.versao = '1'
+        return cabecalho.toxml(element_name='Cabecalho')
