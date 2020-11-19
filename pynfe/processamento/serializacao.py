@@ -842,6 +842,20 @@ class SerializacaoNfse(object):
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes.')
 
+    def envio_rps(self, rps):
+        if self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().envio_rps(rps)
+        else:
+            raise Exception('Este método só esta implementado no autorizador saopaulo')
+
+    def envio_lote_rps(self, rps_list, inicio, fim, transacao=False):
+        if self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().envio_lote_rps(rps_list, inicio, fim, transacao=transacao)
+        else:
+            raise Exception('Este método só esta implementado no autorizador saopaulo')
+
     def consultar_nfse(self, emitente, numero=None, inicio=None, fim=None):
         if self.autorizador.lower() == 'ginfes':
             from pynfe.processamento.autorizador_nfse import SerializacaoGinfes
@@ -863,8 +877,11 @@ class SerializacaoNfse(object):
         if self.autorizador.lower() == 'ginfes':
             from pynfe.processamento.autorizador_nfse import SerializacaoGinfes
             return SerializacaoGinfes().consultar_lote(emitente, numero)
+        elif self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().consultar_lote(emitente, numero)
         else:
-            raise Exception('Este método só esta implementado no autorizador ginfes.')
+            raise Exception('Este método só esta implementado no autorizador ginfes e saopaulo')
 
     def consultar_rps(self, emitente, numero, serie, tipo):
         if self.autorizador.lower() == 'ginfes':
@@ -873,22 +890,35 @@ class SerializacaoNfse(object):
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes.')
 
-    def consultar_situacao_lote(self, emitente, numero):
+    def consultar_situacao_lote(self, emitente, numero=None):
         if self.autorizador.lower() == 'ginfes':
             from pynfe.processamento.autorizador_nfse import SerializacaoGinfes
             return SerializacaoGinfes().consultar_situacao_lote(emitente, numero)
+        elif self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().consultar_situacao_lote(emitente, numero)
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes.')
+
+    def consultar_cnpj(self, remetente, contribuinte):
+        if self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().consultar_cnpj(remetente, contribuinte)
+        else:
+            raise Exception('Este método só esta implementado no autorizador saopaulo')
 
     def cancelar(self, nfse):
         if self.autorizador.lower() == 'ginfes':
             from pynfe.processamento.autorizador_nfse import SerializacaoGinfes
             ## versao 3
-            #return SerializacaoGinfes().cancelar(nfse)
+            # return SerializacaoGinfes().cancelar(nfse)
             ## versao 2
             return SerializacaoGinfes().cancelar_v2(nfse)
         elif self.autorizador.lower() == 'betha':
             from pynfe.processamento.autorizador_nfse import SerializacaoBetha
             return SerializacaoBetha().cancelar(nfse)
+        elif self.autorizador.lower() == 'saopaulo':
+            from pynfe.processamento.autorizador_nfse import SerializacaoSP
+            return SerializacaoSP().cancelar(nfse)
         else:
             raise Exception('Autorizador não suportado para cancelamento!')

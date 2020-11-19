@@ -108,7 +108,8 @@ class SerializacaoBetha(InterfaceAutorizador):
         consulta.IdentificacaoRps = id_rps
         consulta.Prestador = id_prestador
 
-        consulta = consulta.toxml(element_name='ConsultarNfseRpsEnvio').replace('ns1:','').replace(':ns1','').replace('<?xml version="1.0" ?>','')
+        consulta = consulta.toxml(element_name='ConsultarNfseRpsEnvio').replace('ns1:', '').replace(':ns1', '').replace(
+            '<?xml version="1.0" ?>', '')
 
         return consulta
 
@@ -129,7 +130,9 @@ class SerializacaoBetha(InterfaceAutorizador):
         consulta.Faixa.NumeroNfseInicial = inicio
         consulta.Faixa.NumeroNfseFinal = fim
 
-        consulta = consulta.toxml(element_name='ConsultarNfseFaixaEnvio').replace('ns1:','').replace(':ns1','').replace('<?xml version="1.0" ?>','')
+        consulta = consulta.toxml(element_name='ConsultarNfseFaixaEnvio').replace('ns1:', '').replace(':ns1',
+                                                                                                      '').replace(
+            '<?xml version="1.0" ?>', '')
 
         return consulta
 
@@ -148,7 +151,7 @@ class SerializacaoBetha(InterfaceAutorizador):
         info_pedido = nfse_schema.tcInfPedidoCancelamento()
         info_pedido.Id = '1'
         info_pedido.IdentificacaoNfse = id_nfse
-        #pedido.CodigoCancelamento =
+        # pedido.CodigoCancelamento =
 
         # Pedido
         pedido = nfse_schema.tcPedidoCancelamento()
@@ -254,9 +257,12 @@ class SerializacaoGinfes(InterfaceAutorizador):
         servico_cancelar_nfse_envio_v03 = import_module('pynfe.utils.nfse.ginfes.servico_cancelar_nfse_envio_v03')
         servico_enviar_lote_rps_envio_v03 = import_module('pynfe.utils.nfse.ginfes.servico_enviar_lote_rps_envio_v03')
         cabecalho_v03 = import_module('pynfe.utils.nfse.ginfes.cabecalho_v03')
-        servico_consultar_lote_rps_envio_v03 = import_module('pynfe.utils.nfse.ginfes.servico_consultar_lote_rps_envio_v03')
-        servico_consultar_situacao_lote_rps_envio_v03 = import_module('pynfe.utils.nfse.ginfes.servico_consultar_situacao_lote_rps_envio_v03')
-        servico_consultar_nfse_rps_envio_v03 = import_module('pynfe.utils.nfse.ginfes.servico_consultar_nfse_rps_envio_v03')
+        servico_consultar_lote_rps_envio_v03 = import_module(
+            'pynfe.utils.nfse.ginfes.servico_consultar_lote_rps_envio_v03')
+        servico_consultar_situacao_lote_rps_envio_v03 = import_module(
+            'pynfe.utils.nfse.ginfes.servico_consultar_situacao_lote_rps_envio_v03')
+        servico_consultar_nfse_rps_envio_v03 = import_module(
+            'pynfe.utils.nfse.ginfes.servico_consultar_nfse_rps_envio_v03')
 
     def consultar_rps(self, emitente, numero, serie, tipo):
         """ Retorna string de um XML de consulta por Rps gerado a partir do
@@ -330,7 +336,7 @@ class SerializacaoGinfes(InterfaceAutorizador):
         servico = _tipos.tcDadosServico()
         valores_servico = _tipos.tcValores()
         valores_servico.ValorServicos = nfse.servico.valor_servico
-        #valores_servico.ValorServicos = str(Decimal(nfse.servico.valor_servico.quantize(Decimal('.01'), rounding=ROUND_HALF_UP)))
+        # valores_servico.ValorServicos = str(Decimal(nfse.servico.valor_servico.quantize(Decimal('.01'), rounding=ROUND_HALF_UP)))
         valores_servico.IssRetido = nfse.servico.iss_retido
         # Dados opcionais
         if nfse.servico.valor_deducoes:
@@ -433,10 +439,10 @@ class SerializacaoGinfes(InterfaceAutorizador):
         # 6 - Microempresário e Empresa de Pequeno Porte (ME EPP)
         if nfse.regime_especial:
             inf_rps.RegimeEspecialTributacao = nfse.regime_especial
-        inf_rps.OptanteSimplesNacional = nfse.simples # 1-sim 2-nao
-        inf_rps.IncentivadorCultural = nfse.incentivo # 1-sim 2-nao
+        inf_rps.OptanteSimplesNacional = nfse.simples  # 1-sim 2-nao
+        inf_rps.IncentivadorCultural = nfse.incentivo  # 1-sim 2-nao
         # Código de status da NFS-e
-        inf_rps.Status = 1    # 1 – Normal 2 – Cancelado (sempre 1, pois a nota não pode ser enviada como cancelada)
+        inf_rps.Status = 1  # 1 – Normal 2 – Cancelado (sempre 1, pois a nota não pode ser enviada como cancelada)
         inf_rps.RpsSubstituido = None  # opcional 
         inf_rps.Servico = servico
         inf_rps.Prestador = id_prestador
@@ -492,9 +498,9 @@ class SerializacaoGinfes(InterfaceAutorizador):
         from lxml import etree
         ns1 = 'http://www.ginfes.com.br/servico_cancelar_nfse_envio'
         ns2 = 'http://www.ginfes.com.br/tipos'
-        raiz = etree.Element('{%s}CancelarNfseEnvio'%ns1, nsmap={'ns1': ns1, 'ns2':ns2})
-        prestador = etree.SubElement(raiz, '{%s}Prestador'%ns1)
-        etree.SubElement(prestador, '{%s}Cnpj'%ns2).text = nfse.emitente.cnpj
+        raiz = etree.Element('{%s}CancelarNfseEnvio' % ns1, nsmap={'ns1': ns1, 'ns2': ns2})
+        prestador = etree.SubElement(raiz, '{%s}Prestador' % ns1)
+        etree.SubElement(prestador, '{%s}Cnpj' % ns2).text = nfse.emitente.cnpj
         etree.SubElement(prestador, '{%s}InscricaoMunicipal' % ns2).text = nfse.emitente.inscricao_municipal
         etree.SubElement(raiz, '{%s}NumeroNfse' % ns1).text = nfse.identificador
         return etree.tostring(raiz, encoding='unicode')
@@ -535,7 +541,7 @@ class SerializacaoSP(InterfaceAutorizador):
         CPFCNPJ.CNPJ = emitente.cnpj
 
         # Cabecalho
-        cabecalho = servico_informacoes_lote_v01.CabecalhoType()
+        cabecalho = servico_consulta_NFe_v01.CabecalhoType()
         cabecalho.Versao = int(1)
         cabecalho.CPFCNPJRemetente = CPFCNPJ
 
@@ -601,6 +607,262 @@ class SerializacaoSP(InterfaceAutorizador):
                         namespacedef_='xmlns:p1="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
                         pretty_print=True)
         return etree.fromstring(f_str.getvalue())
+
+    def consultar_lote(self, emitente, numero=None):
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = emitente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_consulta_lote_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+        cabecalho.NumeroLote = numero
+
+        # Consulta
+        consulta = servico_consulta_lote_v01.PedidoConsultaLote()
+        consulta.Cabecalho = cabecalho
+
+        f_str = io.StringIO()
+        consulta.export(f_str, 0,
+                        name_='p1:PedidoConsultaLote',
+                        namespacedef_='xmlns:p1="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+                        pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def consultar_situacao_lote(self, emitente, numero):
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = emitente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_informacoes_lote_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+        if numero is not None:
+            cabecalho.NumeroLote = numero
+        cabecalho.InscricaoPrestador = int(emitente.inscricao_municipal)
+
+        # Consulta
+        consulta = servico_informacoes_lote_v01.PedidoInformacoesLote()
+        consulta.Cabecalho = cabecalho
+
+        f_str = io.StringIO()
+        consulta.export(f_str, 0,
+                        name_='p1:PedidoInformacoesLote',
+                        namespacedef_='xmlns:p1="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+                        pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def consultar_cnpj(self, remetente, contribuinte):
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = remetente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_consulta_CNPJ_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+
+        # Consulta
+        consulta = servico_consulta_CNPJ_v01.PedidoConsultaCNPJ()
+        consulta.Cabecalho = cabecalho
+        if contribuinte.tipo_documento != 'CNPJ':
+            raise NameError('contribuinte.tipo_documento != "CNPJ"')
+        else:
+            cnpj_contribuinte = _tipos.tpCPFCNPJ()
+            cnpj_contribuinte.CNPJ = contribuinte.numero_documento
+            consulta.CNPJContribuinte = cnpj_contribuinte
+
+        f_str = io.StringIO()
+        consulta.export(f_str, 0,
+                        name_='p1:PedidoConsultaCNPJ',
+                        namespacedef_='xmlns:p1="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+                        pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def envio_rps(self, rps):
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = rps.emitente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_envio_RPS_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+
+        rps_ = self.generate_rps(rps)
+
+        # Pedido
+        pedido = servico_envio_RPS_v01.PedidoEnvioRPS()
+        pedido.Cabecalho = cabecalho
+        pedido.RPS = rps_
+
+        f_str = io.StringIO()
+        pedido.export(f_str, 0,
+                      name_='PedidoEnvioRPS',
+                      namespacedef_='xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.prefeitura.sp.gov.br/nfe"',
+                      pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def envio_lote_rps(self, rps_list, inicio, fim, transacao):
+
+        # Pedido
+        pedido = servico_envio_lote_RPS_v01.PedidoEnvioLoteRPS()
+
+        valor_total_servicos = 0
+        valor_total_deducoes = 0
+
+        for rps in rps_list:
+            valor_total_servicos += rps.servico.valor_servico
+            valor_total_deducoes += rps.servico.valor_deducoes
+            rps_ = self.generate_rps(rps)
+            pedido.RPS.append(rps_)
+
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = rps_list[0].emitente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_envio_lote_RPS_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+        cabecalho.transacao = transacao
+        cabecalho.QtdRPS = len(rps_list)
+        # transacao = True -> os RPS serão subistituidos por nf se não ocorrer nenhum erro durante o processamento
+        # de todod o lote
+        # transacao = False -> os RPS válidos serão subistituidos por nf, mesmo que ocorram eventos de erro durante
+        # o processamento de outros rps deste lote
+        cabecalho.ValorTotalDeducoes = valor_total_deducoes
+        cabecalho.ValorTotalServicos = valor_total_servicos
+        cabecalho.dtInicio = inicio
+        cabecalho.dtFim = fim
+        pedido.Cabecalho = cabecalho
+
+        f_str = io.StringIO()
+        pedido.export(f_str, 0,
+                      name_='PedidoEnvioLoteRPS',
+                      namespacedef_='xmlns="http://www.prefeitura.sp.gov.br/nfe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"',
+                      pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    def cancelar(self, nfse):
+        # CPFCNPJ
+        CPFCNPJ = _tipos.tpCPFCNPJ()
+        CPFCNPJ.CNPJ = nfse.emitente.cnpj
+
+        # Cabecalho
+        cabecalho = servico_cancela_NFe_v01.CabecalhoType()
+        cabecalho.Versao = int(1)
+        cabecalho.CPFCNPJRemetente = CPFCNPJ
+
+        # Chave
+        chave = servico_cancela_NFe_v01.tpChaveNFe()
+        chave.InscricaoPrestador = int(nfse.emitente.inscricao_municipal)
+        chave.NumeroNFe = int(nfse.identificador)
+
+        # Detalhe
+        detalhe = servico_cancela_NFe_v01.DetalheType()
+        detalhe.ChaveNFe = chave
+        ass = str(nfse.emitente.inscricao_municipal).zfill(8) + str(nfse.identificador).zfill(12)
+        detalhe.AssinaturaCancelamento = ass.encode('ASCII', 'ignore')
+
+        # Pedido
+        pedido = servico_cancela_NFe_v01.PedidoCancelamentoNFe()
+        pedido.Cabecalho = cabecalho
+        pedido.Detalhe.append(detalhe)
+
+        f_str = io.StringIO()
+        pedido.export(f_str, 0,
+                      name_='PedidoCancelamentoNFe',
+                      namespacedef_='xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.prefeitura.sp.gov.br/nfe"',
+                      pretty_print=True)
+        return etree.fromstring(f_str.getvalue())
+
+    @staticmethod
+    def generate_rps(rps):
+        # RPS
+        rps_ = _tipos.tpRPS()
+        # Chave RPS
+        chave = _tipos.tpChaveRPS()
+        chave.InscricaoPrestador = int(rps.emitente.inscricao_municipal)  #
+        chave.SerieRPS = rps.chave_rps_serie  #
+        chave.NumeroRPS = rps.chave_rps_numero  #
+        rps_.ChaveRPS = chave
+
+        rps_.TipoRPS = rps.TipoRPS
+        rps_.DataEmissao = rps.DataEmissao  #
+        rps_.StatusRPS = rps.StatusRPS  #
+        rps_.TributacaoRPS = rps.TributacaoRPS  #
+        rps_.ValorServicos = rps.servico.valor_servico  #
+        rps_.ValorDeducoes = rps.servico.valor_deducoes  #
+        rps_.ValorPIS = rps.servico.valor_pis
+        rps_.ValorCOFINS = rps.servico.valor_confins
+        rps_.ValorINSS = rps.servico.valor_inss
+        rps_.ValorIR = rps.servico.valor_ir
+        rps_.ValorCSLL = rps.servico.valor_csll
+        rps_.CodigoServico = rps.CodigoServico  #
+        rps_.AliquotaServicos = rps.servico.aliquota
+        if rps.servico.iss_retido == 1:
+            rps_.ISSRetido = 'true'  #
+            retido = 'S'
+        else:
+            rps_.ISSRetido = 'false'  #
+            retido = 'N'
+
+        CPFCNPJ_tomador = _tipos.tpCPFCNPJ()
+        if rps.cliente.tipo_documento == 'CNPJ':
+            CPFCNPJ_tomador.CNPJ = rps.cliente.numero_documento  #
+            cpfcnpj = '2' + str(rps.cliente.numero_documento).zfill(14)
+        else:
+            CPFCNPJ_tomador.CPF = rps.cliente.numero_documento  #
+            cpfcnpj = '1' + str(rps.cliente.numero_documento).zfill(14)
+        rps_.CPFCNPJTomador = CPFCNPJ_tomador
+
+        rps_.InscricaoMunicipalTomador = int(rps.cliente.inscricao_municipal)
+        rps_.RazaoSocialTomador = rps.cliente.razao_social
+
+        edereco_tomador = _tipos.tpEndereco()
+        edereco_tomador.TipoLogradouro = rps.cliente.endereco_tipo_logradouro
+        edereco_tomador.Logradouro = rps.cliente.endereco_logradouro
+        edereco_tomador.NumeroEndereco = rps.cliente.endereco_numero
+        edereco_tomador.ComplementoEndereco = rps.cliente.endereco_complemento
+        edereco_tomador.Bairro = rps.cliente.endereco_bairro
+        edereco_tomador.Cidade = int(rps.cliente.endereco_cod_municipio)
+        edereco_tomador.UF = rps.cliente.endereco_uf
+        edereco_tomador.CEP = int(rps.cliente.endereco_cep)
+        rps_.EnderecoTomador = edereco_tomador
+        rps_.EmailTomador = rps.cliente.email
+        rps_.Discriminacao = rps.servico.discriminacao
+        rps_.ValorCargaTributaria = rps.ValorCargaTributaria
+        rps_.PercentualCargaTributaria = rps.PercentualCargaTributaria
+        try:
+            rps_.MunicipioPrestacao = int(rps.servico.codigo_tributacao_municipio)
+        except ValueError:
+            pass
+        rps_.ValorTotalRecebido = rps.servico.valor_liquido
+
+        # não implementado
+        # rps_.CPFCNPJIntermediario =
+        # rps_.InscricaoMunicipalIntermediario =
+        # rps_.ISSRetidoIntermediario =
+        # rps_.EmailIntermediario =
+        # rps_.CPFCNPJIntermediario =
+        # rps_.CodigoCEI =
+        # rps_.MatriculaObra =
+        # rps_.NumeroEncapsulamento =
+
+        # assinatura
+
+        ass_string = str(rps_.ChaveRPS.InscricaoPrestador) + str(rps_.ChaveRPS.SerieRPS).ljust(5) \
+                     + str(rps_.ChaveRPS.NumeroRPS).zfill(12) + rps_.DataEmissao.strftime('%Y%m%d') \
+                     + str(rps_.TributacaoRPS) + str(rps_.StatusRPS) + retido \
+                     + str(rps_.ValorServicos).replace('.', '').zfill(15) \
+                     + str(rps_.ValorDeducoes).replace('.', '').zfill(15) + str(rps_.CodigoServico).zfill(5) \
+                     + cpfcnpj
+        rps_.Assinatura = ass_string.encode('ASCII', 'ignore')
+
+        return rps_
 
     def cabecalho(self):
         # info

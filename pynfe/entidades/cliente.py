@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .base import Entidade
 from pynfe.utils.flags import CODIGO_BRASIL
+from .base import Entidade
 
 
 class Cliente(Entidade):
@@ -35,6 +35,9 @@ class Cliente(Entidade):
     # Endereco
     # - Logradouro (obrigatorio)
     endereco_logradouro = str()
+
+    # - TipoLogradouro ()
+    endereco_tipo_logradouro = str()
 
     # - Numero (obrigatorio)
     endereco_numero = str()

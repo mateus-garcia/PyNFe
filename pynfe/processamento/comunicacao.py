@@ -486,6 +486,11 @@ class ComunicacaoNfse(Comunicacao):
             xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
             # comunica via wsdl
             return self._post_https(url, xml, 'enviar_lote')
+        elif self.autorizador == 'SAOPAULO':
+            # xml
+            xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'enviar_lote')
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes.')
 
@@ -527,6 +532,17 @@ class ComunicacaoNfse(Comunicacao):
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes e são paulo')
 
+    def consultar_cnpj(self, xml):
+        # url do serviço
+        url = self._get_url()
+        if self.autorizador == 'SAOPAULO':
+            # xml
+            xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'consulta_cnpj')
+        else:
+            raise Exception('Este método só esta implementado no autorizador ginfes e são paulo')
+
     def consultar_rps(self, xml):
         # url do serviço
         url = self._get_url()
@@ -556,6 +572,11 @@ class ComunicacaoNfse(Comunicacao):
             xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
             # comunica via wsdl
             return self._post_https(url, xml, 'consulta_lote')
+        elif self.autorizador == 'SAOPAULO':
+            # xml
+            xml = '<?xml version="1.0" encoding="UTF-8"?>' + xml
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'consulta_lote')
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes.')
 
@@ -565,8 +586,11 @@ class ComunicacaoNfse(Comunicacao):
         if self.autorizador == 'GINFES':
             # comunica via wsdl
             return self._post_https(url, xml, 'consulta_situacao_lote')
+        elif self.autorizador == 'SAOPAULO':
+            # comunica via wsdl
+            return self._post_sp(url, xml, 'consulta_situacao_lote')
         else:
-            raise Exception('Este método só esta implementado no autorizador ginfes.')
+            raise Exception('Este método só esta implementado no autorizador ginfes e saopaulo')
 
     def cancelar(self, xml):
         # url do serviço
@@ -579,7 +603,10 @@ class ComunicacaoNfse(Comunicacao):
         elif self.autorizador == 'GINFES':
             # comunica via wsdl com certificado
             return self._post_https(url, xml, 'cancelar')
-        # TODO outros autorizadres
+        # Sao Paulo
+        elif self.autorizador == 'SAOPAULO':
+            # comunica via wsdl com certificado
+            return self._post_sp(url, xml, 'cancelar')
         else:
             raise Exception('Autorizador não encontrado!')
 
@@ -709,12 +736,24 @@ class ComunicacaoNfse(Comunicacao):
             chave, cert = certificadoA1.separar_arquivo(self.certificado_senha, caminho=True)
 
             cliente = Client(url, transport=HttpAuthenticated(key=chave, cert=cert, endereco=url))
+
             if metodo == 'consulta':
                 return cliente.service.ConsultaNFe(1, xml)
             elif metodo == 'consulta_recebidas':
                 return cliente.service.ConsultaNFeRecebidas(1, xml)
             elif metodo == 'consulta_emitidas':
                 return cliente.service.ConsultaNFeEmitidas(1, xml)
+            elif metodo == 'consulta_lote':
+                return cliente.service.ConsultaLote(1, xml)
+            elif metodo == 'consulta_situacao_lote':
+                return cliente.service.ConsultaInformacoesLote(1, xml)
+            elif metodo == 'consulta_cnpj':
+                return cliente.service.ConsultaCNPJ(1, xml)
+            elif metodo == 'enviar_lote':
+                # ambiente de teste, para produção, trocar para cliente.service.EnvioLoteRPS(1, xml)
+                return cliente.service.TesteEnvioLoteRPS(1, xml)
+            elif metodo == 'cancelar':
+                return cliente.service.CancelamentoNFe(1, xml)
 
         except Exception as e:
             raise e

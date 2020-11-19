@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import signxml
+from Crypto.Hash import SHA
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
 from signxml import XMLSigner
 
 from pynfe.entidades import CertificadoA1
@@ -60,3 +63,23 @@ class AssinaturaA1(Assinatura):
             return etree.tostring(signed_root, encoding="unicode", pretty_print=False)
         else:
             return signed_root
+
+    def assinar_rps(self, xml, retorna_string=False):
+        """
+        Função para gerar a assinatura do rps, seguindo o padrão do werbservice de São Paulo
+        @param xml: lxml.etree._Element
+        @param retorna_string:
+        @return: xml
+        """
+        pri_key = RSA.importKey(self.key)
+
+        for assinatura in [x for x in xml.xpath('//*') if 'Assinatura' in x.tag]:
+            ass_text = assinatura.text
+            digest = SHA.new(ass_text.encode('ascii'))
+            signature = PKCS1_v1_5.new(pri_key).sign(digest).hex()
+            assinatura.text = signature
+
+        if retorna_string:
+            return etree.tostring(xml, encoding="unicode", pretty_print=False)
+        else:
+            return xml
