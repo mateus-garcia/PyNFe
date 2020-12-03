@@ -866,10 +866,10 @@ class SerializacaoNfse(object):
         else:
             raise Exception('Este método só esta implementado no autorizador ginfes e saopaulo')
 
-    def consultar_nfse_emit_recb(self, cnpj, emitente=None, cliente=None, inicio=None, fim=None):
+    def consultar_nfse_emit_recb(self, cnpj, emitente=None, cliente=None, inicio=None, fim=None, n_pag=None):
         if self.autorizador.lower() == 'saopaulo':
             from pynfe.processamento.autorizador_nfse import SerializacaoSP
-            return SerializacaoSP().consultar_nfse_periodo(cnpj, emitente, cliente, inicio, fim)
+            return SerializacaoSP().consultar_nfse_periodo(cnpj, emitente, cliente, inicio, fim, n_pag)
         else:
             raise Exception('Este método só esta implementado no autorizador saopaulo')
 

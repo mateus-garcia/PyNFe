@@ -564,7 +564,7 @@ class SerializacaoSP(InterfaceAutorizador):
                         pretty_print=True)
         return etree.fromstring(f_str.getvalue())
 
-    def consultar_nfse_periodo(self, cnpj, emitente, cliente, inicio=None, fim=None):
+    def consultar_nfse_periodo(self, cnpj, emitente, cliente, inicio=None, fim=None, n_pag=None):
         # parece ok por enquanto
 
         # CPFCNPJRementente
@@ -596,6 +596,9 @@ class SerializacaoSP(InterfaceAutorizador):
 
         cabecalho.dtInicio = inicio
         cabecalho.dtFim = fim
+
+        if n_pag is not None:
+            cabecalho.NumeroPagina = n_pag
 
         # Consulta
         consulta = servico_consulta_NFe_periodo_v01.PedidoConsultaNFePeriodo()
